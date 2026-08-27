@@ -1,0 +1,7 @@
+{
+  "name": "HDB Finder",
+  "description": "Singapore HDB property search, median price trend analysis, and nearby amenity comparison.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
