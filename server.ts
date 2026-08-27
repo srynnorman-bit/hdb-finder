@@ -25,8 +25,15 @@ async function startServer() {
     res.json({ status: "ok", service: "HDB-Finder Singapore API Backend" });
   });
 
-  // 1. Singapore LTA DataMall v3 Bus Arrival Route
+  // 1. Singapore LTA DataMall v3 Bus Arrival Route & Aliases
   app.get("/api/bus-arrival", getBusArrivalHandler);
+  app.get("/api/busArrival", getBusArrivalHandler);
+  app.get("/api/bus_arrival", getBusArrivalHandler);
+  app.get("/api/bus-arrivals", getBusArrivalHandler);
+  app.get("/api/lta/bus-arrival", getBusArrivalHandler);
+  app.get("/api/ltaodataservice/v3/BusArrival", getBusArrivalHandler);
+  app.get("/ltaodataservice/v3/BusArrival", getBusArrivalHandler);
+  app.get("/ltaodataservice/BusArrival", getBusArrivalHandler);
 
   // 2. Singapore Data.gov.sg HDB Resale API Routes & Aliases
   app.get("/api/hdb-resale/transactions", getHdbResaleTransactionsHandler);
@@ -45,11 +52,29 @@ async function startServer() {
   app.get("/api/v2/public/api/datasets/:datasetId/metadata", getHdbDatasetMetadataHandler);
   app.get("/v2/public/api/datasets/:datasetId/metadata", getHdbDatasetMetadataHandler);
 
-  // 3. Singapore OneMap API Routes
+  // 3. Singapore OneMap API Routes & Aliases
   app.get("/api/onemap/token", getOneMapTokenHandler);
+  app.get("/api/onemap_token", getOneMapTokenHandler);
+  app.get("/api/auth/post/getToken", getOneMapTokenHandler);
+  app.post("/api/auth/post/getToken", getOneMapTokenHandler);
+
   app.get("/api/onemap/search", oneMapSearchHandler);
+  app.get("/api/onemap_search", oneMapSearchHandler);
+  app.get("/api/onemap-search", oneMapSearchHandler);
+  app.get("/api/common/elastic/search", oneMapSearchHandler);
+  app.get("/common/elastic/search", oneMapSearchHandler);
+
   app.get("/api/onemap/revgeocode", oneMapRevGeocodeHandler);
+  app.get("/api/onemap_revgeocode", oneMapRevGeocodeHandler);
+  app.get("/api/onemap-revgeocode", oneMapRevGeocodeHandler);
+  app.get("/api/public/revgeocode", oneMapRevGeocodeHandler);
+  app.get("/public/revgeocode", oneMapRevGeocodeHandler);
+
   app.get("/api/onemap/route", oneMapRouteHandler);
+  app.get("/api/onemap_route", oneMapRouteHandler);
+  app.get("/api/onemap-route", oneMapRouteHandler);
+  app.get("/api/public/routingsvc/route", oneMapRouteHandler);
+  app.get("/public/routingsvc/route", oneMapRouteHandler);
 
   // Vite middleware for development vs static build in production
   if (process.env.NODE_ENV !== "production") {

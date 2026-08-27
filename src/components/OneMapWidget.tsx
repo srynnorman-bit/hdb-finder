@@ -46,21 +46,24 @@ export const OneMapWidget: React.FC<OneMapWidgetProps> = ({
     setSearchLoading(true);
     setSearchError(null);
     try {
-      const res = await fetch(`/api/onemap/search?searchVal=${encodeURIComponent(term.trim())}&returnGeom=Y&getAddrDetails=Y&pageNum=1`);
+      let res = await fetch(`/api/onemap/search?searchVal=${encodeURIComponent(term.trim())}&returnGeom=Y&getAddrDetails=Y&pageNum=1`);
+      if (!res.ok) {
+        res = await fetch(`/api/common/elastic/search?searchVal=${encodeURIComponent(term.trim())}&returnGeom=Y&getAddrDetails=Y&pageNum=1`);
+      }
+      if (!res.ok) {
+        res = await fetch(`https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${encodeURIComponent(term.trim())}&returnGeom=Y&getAddrDetails=Y&pageNum=1`);
+      }
+
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
-        if (errJson.error === 'credential not configured') {
-          setSearchError('OneMap credentials not configured. Provide ONEMAP_TOKEN or (ONEMAP_EMAIL & ONEMAP_PASSWORD) in AI Studio Settings.');
-        } else {
-          setSearchError(errJson.error || `OneMap search failed with status ${res.status}`);
-        }
+        setSearchError(errJson.error || `OneMap search failed with status ${res.status}`);
         setSearchResult(null);
       } else {
         const json: OneMapSearchResponse = await res.json();
         setSearchResult(json);
       }
     } catch (err: unknown) {
-      setSearchError(err instanceof Error ? err.message : 'Failed to reach OneMap backend');
+      setSearchError(err instanceof Error ? err.message : 'Failed to reach OneMap service');
     } finally {
       setSearchLoading(false);
     }
@@ -72,21 +75,21 @@ export const OneMapWidget: React.FC<OneMapWidgetProps> = ({
     setRevLoading(true);
     setRevError(null);
     try {
-      const res = await fetch(`/api/onemap/revgeocode?location=${encodeURIComponent(revLocation.trim())}&buffer=${revBuffer}&addressType=All`);
+      let res = await fetch(`/api/onemap/revgeocode?location=${encodeURIComponent(revLocation.trim())}&buffer=${revBuffer}&addressType=All`);
+      if (!res.ok) {
+        res = await fetch(`/api/public/revgeocode?location=${encodeURIComponent(revLocation.trim())}&buffer=${revBuffer}&addressType=All`);
+      }
+
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
-        if (errJson.error === 'credential not configured') {
-          setRevError('OneMap credentials not configured. Provide ONEMAP_TOKEN or (ONEMAP_EMAIL & ONEMAP_PASSWORD) in AI Studio Settings.');
-        } else {
-          setRevError(errJson.error || `OneMap rev-geocode failed with status ${res.status}`);
-        }
+        setRevError(errJson.error || `OneMap rev-geocode failed with status ${res.status}`);
         setRevResult(null);
       } else {
         const json: OneMapRevGeocodeResponse = await res.json();
         setRevResult(json);
       }
     } catch (err: unknown) {
-      setRevError(err instanceof Error ? err.message : 'Failed to reach OneMap backend');
+      setRevError(err instanceof Error ? err.message : 'Failed to reach OneMap service');
     } finally {
       setRevLoading(false);
     }
@@ -98,21 +101,21 @@ export const OneMapWidget: React.FC<OneMapWidgetProps> = ({
     setRouteLoading(true);
     setRouteError(null);
     try {
-      const res = await fetch(`/api/onemap/route?start=${encodeURIComponent(startCoord.trim())}&end=${encodeURIComponent(endCoord.trim())}&routeType=${routeType}`);
+      let res = await fetch(`/api/onemap/route?start=${encodeURIComponent(startCoord.trim())}&end=${encodeURIComponent(endCoord.trim())}&routeType=${routeType}`);
+      if (!res.ok) {
+        res = await fetch(`/api/public/routingsvc/route?start=${encodeURIComponent(startCoord.trim())}&end=${encodeURIComponent(endCoord.trim())}&routeType=${routeType}`);
+      }
+
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
-        if (errJson.error === 'credential not configured') {
-          setRouteError('OneMap credentials not configured. Provide ONEMAP_TOKEN or (ONEMAP_EMAIL & ONEMAP_PASSWORD) in AI Studio Settings.');
-        } else {
-          setRouteError(errJson.error || `OneMap routing failed with status ${res.status}`);
-        }
+        setRouteError(errJson.error || `OneMap routing failed with status ${res.status}`);
         setRouteResult(null);
       } else {
         const json: OneMapRouteResponse = await res.json();
         setRouteResult(json);
       }
     } catch (err: unknown) {
-      setRouteError(err instanceof Error ? err.message : 'Failed to reach OneMap backend');
+      setRouteError(err instanceof Error ? err.message : 'Failed to reach OneMap service');
     } finally {
       setRouteLoading(false);
     }

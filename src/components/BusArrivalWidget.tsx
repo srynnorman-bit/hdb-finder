@@ -38,14 +38,21 @@ export const BusArrivalWidget: React.FC<BusArrivalWidgetProps> = ({
         url += `&ServiceNo=${encodeURIComponent(svcNo.trim())}`;
       }
 
-      const res = await fetch(url);
+      let res = await fetch(url);
+      if (!res.ok) {
+        let altUrl = `/api/busArrival?BusStopCode=${encodeURIComponent(stopCode.trim())}`;
+        if (svcNo && svcNo.trim()) altUrl += `&ServiceNo=${encodeURIComponent(svcNo.trim())}`;
+        res = await fetch(altUrl);
+      }
+      if (!res.ok) {
+        let altUrl2 = `/api/ltaodataservice/v3/BusArrival?BusStopCode=${encodeURIComponent(stopCode.trim())}`;
+        if (svcNo && svcNo.trim()) altUrl2 += `&ServiceNo=${encodeURIComponent(svcNo.trim())}`;
+        res = await fetch(altUrl2);
+      }
+
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
-        if (errJson.error === 'credential not configured') {
-          setError('LTA DataMall AccountKey is not configured on the server. Set LTA_DATAMALL_ACCOUNT_KEY in your environment to view real-time arrivals.');
-        } else {
-          setError(errJson.error || `Server returned error ${res.status}`);
-        }
+        setError(errJson.error || `Arrival service returned error ${res.status}`);
         setData(null);
       } else {
         const json: BusArrivalResponse = await res.json();
@@ -54,7 +61,7 @@ export const BusArrivalWidget: React.FC<BusArrivalWidgetProps> = ({
         setCountdown(20);
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to connect to backend';
+      const message = err instanceof Error ? err.message : 'Failed to connect to arrival service';
       setError(message);
     } finally {
       setLoading(false);
