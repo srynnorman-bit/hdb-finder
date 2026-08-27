@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { HdbArea, FlatType } from '../types';
+import { BusArrivalWidget } from './BusArrivalWidget';
+import { LiveResaleDataSection } from './LiveResaleDataSection';
+import { OneMapWidget } from './OneMapWidget';
 
 interface AreaDetailModalProps {
   area: HdbArea | null;
@@ -16,7 +19,7 @@ export const AreaDetailModal: React.FC<AreaDetailModalProps> = ({
   isFavorite,
   onToggleFavorite,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'trends' | 'transactions' | 'amenities' | 'calculator'>('trends');
+  const [activeSubTab, setActiveSubTab] = useState<'trends' | 'transactions' | 'bus' | 'onemap' | 'amenities' | 'calculator'>('trends');
   const [selectedFlatType, setSelectedFlatType] = useState<FlatType>('4-Room');
 
   if (!isOpen || !area) return null;
@@ -52,7 +55,7 @@ export const AreaDetailModal: React.FC<AreaDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-xs p-0 sm:p-4">
-      <div className="w-full max-w-xl bg-[#f9f9ff] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-[#e7eeff] animate-in fade-in duration-200">
+      <div className="w-full max-w-2xl bg-[#f9f9ff] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden border border-[#e7eeff] animate-in fade-in duration-200">
         {/* Header */}
         <div className="px-5 py-4 bg-white border-b border-[#e7eeff] flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -66,7 +69,7 @@ export const AreaDetailModal: React.FC<AreaDetailModalProps> = ({
                   {area.region}
                 </span>
               </div>
-              <p className="text-[12px] text-[#434654]">Singapore HDB Estate Profile</p>
+              <p className="text-[12px] text-[#434654]">Singapore HDB Estate & Live Data Profile</p>
             </div>
           </div>
 
@@ -93,10 +96,10 @@ export const AreaDetailModal: React.FC<AreaDetailModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-[#e7eeff] bg-[#f0f3ff] px-3 pt-2 gap-2 overflow-x-auto no-scrollbar">
+        <div className="flex border-b border-[#e7eeff] bg-[#f0f3ff] px-3 pt-2 gap-1.5 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveSubTab('trends')}
-            className={`pb-2 px-3 text-[13px] font-semibold border-b-2 transition-all whitespace-nowrap ${
+            className={`pb-2 px-3 text-[12px] font-semibold border-b-2 transition-all whitespace-nowrap ${
               activeSubTab === 'trends'
                 ? 'border-[#003d9b] text-[#003d9b]'
                 : 'border-transparent text-[#434654] hover:text-[#091c35]'
@@ -106,27 +109,47 @@ export const AreaDetailModal: React.FC<AreaDetailModalProps> = ({
           </button>
           <button
             onClick={() => setActiveSubTab('transactions')}
-            className={`pb-2 px-3 text-[13px] font-semibold border-b-2 transition-all whitespace-nowrap ${
+            className={`pb-2 px-3 text-[12px] font-semibold border-b-2 transition-all whitespace-nowrap ${
               activeSubTab === 'transactions'
                 ? 'border-[#003d9b] text-[#003d9b]'
                 : 'border-transparent text-[#434654] hover:text-[#091c35]'
             }`}
           >
-            Recent Resales
+            Live Resales (Data.gov.sg)
+          </button>
+          <button
+            onClick={() => setActiveSubTab('bus')}
+            className={`pb-2 px-3 text-[12px] font-semibold border-b-2 transition-all whitespace-nowrap ${
+              activeSubTab === 'bus'
+                ? 'border-[#003d9b] text-[#003d9b]'
+                : 'border-transparent text-[#434654] hover:text-[#091c35]'
+            }`}
+          >
+            Bus Arrivals (LTA v3)
+          </button>
+          <button
+            onClick={() => setActiveSubTab('onemap')}
+            className={`pb-2 px-3 text-[12px] font-semibold border-b-2 transition-all whitespace-nowrap ${
+              activeSubTab === 'onemap'
+                ? 'border-[#003d9b] text-[#003d9b]'
+                : 'border-transparent text-[#434654] hover:text-[#091c35]'
+            }`}
+          >
+            OneMap Geospatial
           </button>
           <button
             onClick={() => setActiveSubTab('amenities')}
-            className={`pb-2 px-3 text-[13px] font-semibold border-b-2 transition-all whitespace-nowrap ${
+            className={`pb-2 px-3 text-[12px] font-semibold border-b-2 transition-all whitespace-nowrap ${
               activeSubTab === 'amenities'
                 ? 'border-[#003d9b] text-[#003d9b]'
                 : 'border-transparent text-[#434654] hover:text-[#091c35]'
             }`}
           >
-            Amenities (2km)
+            Amenities
           </button>
           <button
             onClick={() => setActiveSubTab('calculator')}
-            className={`pb-2 px-3 text-[13px] font-semibold border-b-2 transition-all whitespace-nowrap ${
+            className={`pb-2 px-3 text-[12px] font-semibold border-b-2 transition-all whitespace-nowrap ${
               activeSubTab === 'calculator'
                 ? 'border-[#003d9b] text-[#003d9b]'
                 : 'border-transparent text-[#434654] hover:text-[#091c35]'
@@ -198,45 +221,38 @@ export const AreaDetailModal: React.FC<AreaDetailModalProps> = ({
             </div>
           )}
 
-          {/* Subtab 2: Transactions */}
+          {/* Subtab 2: Live Data.gov.sg Resales */}
           {activeSubTab === 'transactions' && (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <span className="text-[12px] font-bold text-[#003d9b] uppercase tracking-wider">
-                  Latest Resale Logged ({area.recentTransactions.length})
-                </span>
-                <span className="text-[11px] text-[#737685]">Source: Data.gov.sg / HDB</span>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                {area.recentTransactions.map((tx) => (
-                  <div
-                    key={tx.id}
-                    className="p-3 bg-white rounded-xl border border-[#e7eeff] flex flex-col gap-1.5 shadow-2xs"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-[14px] text-[#091c35]">
-                        {tx.block} {tx.streetName}
-                      </span>
-                      <span className="font-bold text-[14px] text-[#003d9b] tabular-nums">
-                        {formatPrice(tx.resalePrice)}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 text-[12px] text-[#434654]">
-                      <span className="px-2 py-0.5 bg-[#f0f3ff] rounded font-medium text-[#003d9b]">
-                        {tx.flatType}
-                      </span>
-                      <span>• Storey {tx.storeyRange}</span>
-                      <span>• {tx.floorAreaSqm} sqm</span>
-                      <span>• {tx.remainingLease} left</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <LiveResaleDataSection
+              defaultTown={area.name.toUpperCase()}
+              defaultFlatType="4 ROOM"
+            />
           )}
 
-          {/* Subtab 3: Amenities */}
+          {/* Subtab 3: Live LTA v3 Bus Arrivals */}
+          {activeSubTab === 'bus' && (
+            <BusArrivalWidget
+              initialBusStopCode={area.name.toLowerCase() === 'tampines' ? '83139' : '53009'}
+              initialServiceNo={area.name.toLowerCase() === 'tampines' ? '15' : ''}
+              defaultBusStops={
+                area.amenities.transport.nearbyBusStops || [
+                  { code: '83139', description: `${area.name} Ave 7 (Opp Blk 390)`, popularServices: ['15', '21', '27'] },
+                  { code: '76141', description: `${area.name} Central 1 (MRT)`, popularServices: ['3', '15', '21'] },
+                ]
+              }
+            />
+          )}
+
+          {/* Subtab 4: OneMap Geospatial */}
+          {activeSubTab === 'onemap' && (
+            <OneMapWidget
+              initialSearch={`${area.name} MRT`}
+              initialStartCoord="1.3521,103.9452"
+              initialEndCoord="1.3533,103.9447"
+            />
+          )}
+
+          {/* Subtab 5: Amenities */}
           {activeSubTab === 'amenities' && (
             <div className="flex flex-col gap-3">
               <div className="bg-white p-4 rounded-xl border border-[#e7eeff] flex flex-col gap-3">
@@ -295,7 +311,7 @@ export const AreaDetailModal: React.FC<AreaDetailModalProps> = ({
             </div>
           )}
 
-          {/* Subtab 4: Mortgage Calculator */}
+          {/* Subtab 6: Mortgage Calculator */}
           {activeSubTab === 'calculator' && (
             <div className="flex flex-col gap-4">
               <div className="bg-white p-4 rounded-xl border border-[#e7eeff] flex flex-col gap-3">

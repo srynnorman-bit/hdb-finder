@@ -149,6 +149,50 @@ export const ProfileView: React.FC = () => {
         </div>
       </div>
 
+      {/* Connected Open Data & External Services */}
+      <div className="bg-white p-5 rounded-2xl border border-[#e7eeff] shadow-xs flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-[12px] font-bold tracking-wider uppercase text-[#003d9b]">
+            Connected External Services & APIs
+          </h3>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#82f9be]/40 text-[#004e32]">
+            Backend Proxied
+          </span>
+        </div>
+
+        <div className="flex flex-col gap-2.5 text-[12px]">
+          <div className="p-3 bg-[#f9f9ff] rounded-xl border border-[#e7eeff] flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-[#091c35]">Data.gov.sg HDB Resale Prices (Jan 2017+)</span>
+              <span className="font-mono text-[11px] text-[#006844] font-semibold">Active (Public)</span>
+            </div>
+            <p className="text-[#434654] text-[11px]">
+              Resource ID: <code>d_8b84c4ee58e3cfc0ece0d773c8ca6abc</code> (Datastore & Metadata v2)
+            </p>
+          </div>
+
+          <div className="p-3 bg-[#f9f9ff] rounded-xl border border-[#e7eeff] flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-[#091c35]">LTA DataMall Bus Arrival v3</span>
+              <span className="font-mono text-[11px] text-[#003d9b] font-semibold">Configured</span>
+            </div>
+            <p className="text-[#434654] text-[11px]">
+              Endpoint: <code>/ltaodataservice/v3/BusArrival</code> (20s refresh, AccountKey guardrailed)
+            </p>
+          </div>
+
+          <div className="p-3 bg-[#f9f9ff] rounded-xl border border-[#e7eeff] flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-[#091c35]">Singapore SLA OneMap APIs</span>
+              <span className="font-mono text-[11px] text-[#00687a] font-semibold">Token Minting & Routing</span>
+            </div>
+            <p className="text-[#434654] text-[11px]">
+              Endpoints: <code>/getToken</code>, <code>/elastic/search</code>, <code>/revgeocode</code>, <code>/routingsvc/route</code>
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Alert Preferences */}
       <div className="bg-white p-5 rounded-2xl border border-[#e7eeff] shadow-xs flex flex-col gap-3">
         <h3 className="text-[12px] font-bold tracking-wider uppercase text-[#003d9b]">
