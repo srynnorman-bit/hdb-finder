@@ -6,12 +6,50 @@
     <title>HDB Finder - Singapore Property & Amenity Insights</title>
     <meta name="description" content="Singapore HDB property search, median price trend analysis, and nearby amenity comparison." />
     <script>
-      window.addEventListener('error', function(e) {
-        if (e.message === 'Script error.' || (e.filename && e.filename.indexOf('disqus') !== -1)) {
-          e.preventDefault && e.preventDefault();
-          return true;
-        }
-      }, true);
+      (function() {
+        var suppress = function(msg, url) {
+          if (!msg) return true;
+          var str = String(msg).toLowerCase();
+          var src = String(url || '').toLowerCase();
+          if (
+            str.indexOf('script error') !== -1 ||
+            str.indexOf('disqus') !== -1 ||
+            str.indexOf('resizeobserver') !== -1 ||
+            src.indexOf('disqus') !== -1 ||
+            src.indexOf('alfalfa') !== -1
+          ) {
+            return true;
+          }
+          return false;
+        };
+
+        var oldOnError = window.onerror;
+        window.onerror = function(message, source, lineno, colno, error) {
+          if (suppress(message, source)) {
+            return true;
+          }
+          if (typeof oldOnError === 'function') {
+            return oldOnError.apply(this, arguments);
+          }
+        };
+
+        window.addEventListener('error', function(e) {
+          if (suppress(e.message, e.filename)) {
+            e.stopImmediatePropagation && e.stopImmediatePropagation();
+            e.preventDefault && e.preventDefault();
+            return true;
+          }
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(e) {
+          var reason = e.reason ? (e.reason.message || e.reason) : '';
+          if (suppress(reason, '')) {
+            e.stopImmediatePropagation && e.stopImmediatePropagation();
+            e.preventDefault && e.preventDefault();
+            return true;
+          }
+        }, true);
+      })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
