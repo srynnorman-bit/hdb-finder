@@ -1,13 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-
-declare global {
-  interface Window {
-    DISQUS?: {
-      reset: (options: { reload: boolean; config?: () => void }) => void;
-    };
-    disqus_config?: () => void;
-  }
-}
+import React, { useState } from 'react';
 
 interface DisqusCommentsProps {
   identifier: string;
@@ -22,56 +13,73 @@ export const DisqusComments: React.FC<DisqusCommentsProps> = ({
   url,
   categoryName,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [loadError, setLoadError] = useState<boolean>(false);
-  const canonicalUrl = url || (typeof window !== 'undefined' ? `${window.location.origin}/#${identifier}` : '');
+  const [iframeKey, setIframeKey] = useState<number>(0);
+  const canonicalUrl = url || (typeof window !== 'undefined' ? `${window.location.origin}/#${identifier}` : `https://hdbfinder.local/#${identifier}`);
+  const directDisqusUrl = `https://sn260827-1.disqus.com/?url=${encodeURIComponent(canonicalUrl)}`;
 
-  useEffect(() => {
-    setLoadError(false);
-
-    try {
-      // Define the Disqus configuration
-      const disqusConfig = function (this: { page: { url: string; identifier: string; title: string } }) {
-        this.page.url = canonicalUrl;
-        this.page.identifier = identifier;
-        this.page.title = title;
-      };
-
-      window.disqus_config = disqusConfig;
-
-      // If Disqus script is already loaded on the page, trigger reset with new thread config
-      if (window.DISQUS && typeof window.DISQUS.reset === 'function') {
-        try {
-          window.DISQUS.reset({
-            reload: true,
-            config: disqusConfig,
-          });
-        } catch {
-          // Ignored if reset fails silently
-        }
-      } else {
-        // Inject Disqus Embed script
-        const scriptId = 'disqus-embed-script';
-        let s = document.getElementById(scriptId) as HTMLScriptElement | null;
-        if (!s) {
-          s = document.createElement('script');
-          s.id = scriptId;
-          s.src = 'https://sn260827-1.disqus.com/embed.js';
-          s.setAttribute('data-timestamp', String(+new Date()));
-          s.async = true;
-          s.onerror = () => {
-            setLoadError(true);
-          };
-          (document.head || document.body).appendChild(s);
-        }
-      }
-    } catch {
-      setLoadError(true);
+  // Safe HTML template for Disqus embedded inside an isolated iframe
+  const disqusHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base target="_blank">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 8px 4px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: transparent;
+      color: #091c35;
     }
-  }, [identifier, title, canonicalUrl]);
+    #disqus_thread { width: 100%; min-height: 280px; }
+  </style>
+  <script>
+    window.onerror = function() { return true; };
+    window.addEventListener('error', function(e) {
+      e.stopImmediatePropagation && e.stopImmediatePropagation();
+      e.preventDefault && e.preventDefault();
+      return true;
+    }, true);
+    window.addEventListener('unhandledrejection', function(e) {
+      e.stopImmediatePropagation && e.stopImmediatePropagation();
+      e.preventDefault && e.preventDefault();
+      return true;
+    }, true);
+  </script>
+</head>
+<body>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = "${canonicalUrl}";
+      this.page.identifier = "${identifier}";
+      this.page.title = ${JSON.stringify(title)};
+    };
+    (function() {
+      try {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://sn260827-1.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        s.crossOrigin = 'anonymous';
+        s.onerror = function() {
+          var el = document.getElementById('disqus_thread');
+          if (el) {
+            el.innerHTML = '<div style="padding:16px;background:#f0f3ff;border-radius:12px;font-size:13px;color:#434654;">' +
+              '<strong>Connecting to Disqus Forum...</strong><br>If comments do not appear, you can participate directly via the button above.' +
+              '</div>';
+          }
+        };
+        (d.head || d.body).appendChild(s);
+      } catch(e) {}
+    })();
+  </script>
+</body>
+</html>`;
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e7eeff] p-5 sm:p-6 shadow-xs flex flex-col gap-4">
+    <div className="bg-white rounded-2xl border border-[#e7eeff] p-4 sm:p-6 shadow-xs flex flex-col gap-4">
       {/* Header Info */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#e7eeff] gap-2">
         <div className="flex items-center gap-2.5">
@@ -88,31 +96,40 @@ export const DisqusComments: React.FC<DisqusCommentsProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 self-start sm:self-center">
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#f0f3ff] text-[#003d9b] border border-[#cadbfc]">
+        <div className="flex items-center gap-2 self-start sm:self-center">
+          <button
+            onClick={() => setIframeKey((prev) => prev + 1)}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium text-[#434654] hover:bg-[#f0f3ff] transition-colors border border-[#e7eeff]"
+            title="Reload thread"
+          >
+            <span className="material-symbols-outlined text-[14px]">refresh</span>
+            Reload
+          </button>
+          <a
+            href={directDisqusUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#f0f3ff] text-[#003d9b] border border-[#cadbfc] hover:bg-[#dfe8ff] transition-colors"
+          >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Powered by Disqus
-          </span>
+            Disqus Live
+            <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+          </a>
         </div>
       </div>
 
-      {/* Target Container for Disqus */}
-      <div ref={containerRef} className="min-h-[240px] pt-1">
-        <div id="disqus_thread" className="w-full" />
-        {loadError && (
-          <div className="p-4 rounded-xl bg-[#f0f3ff] border border-[#cadbfc] text-[#434654] text-[13px] flex flex-col gap-2">
-            <p className="font-semibold text-[#091c35]">Connecting to Disqus...</p>
-            <p>If comments do not load, please ensure third-party content is allowed in your browser.</p>
-          </div>
-        )}
-        <noscript>
-          Please enable JavaScript to view the{' '}
-          <a href="https://disqus.com/?ref_noscript" target="_blank" rel="noopener noreferrer" className="text-[#003d9b] underline">
-            comments powered by Disqus.
-          </a>
-        </noscript>
+      {/* Target Container for Isolated Disqus iframe */}
+      <div className="w-full min-h-[360px] rounded-xl overflow-hidden bg-transparent">
+        <iframe
+          key={`${identifier}-${iframeKey}`}
+          srcDoc={disqusHtml}
+          title={`Disqus Discussion - ${title}`}
+          className="w-full h-[480px] sm:h-[540px] border-0 rounded-xl bg-transparent"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"
+        />
       </div>
     </div>
   );
 };
+
 
