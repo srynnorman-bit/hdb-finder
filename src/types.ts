@@ -101,7 +101,7 @@ export interface HdbArea {
   };
 }
 
-export type ActiveTab = 'search' | 'favorites' | 'profile';
+export type ActiveTab = 'search' | 'favorites' | 'community' | 'profile';
 
 // Data.gov.sg Resale Types
 export interface DataGovResaleRecord {

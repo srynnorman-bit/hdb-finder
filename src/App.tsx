@@ -12,6 +12,7 @@ import { AreaCard } from './components/AreaCard';
 import { AddAreaModal } from './components/AddAreaModal';
 import { AreaDetailModal } from './components/AreaDetailModal';
 import { FavoritesView } from './components/FavoritesView';
+import { CommunityView } from './components/CommunityView';
 import { ProfileView } from './components/ProfileView';
 
 export default function App() {
@@ -138,6 +139,8 @@ export default function App() {
             onNavigateToSearch={() => setActiveTab('search')}
           />
         )}
+
+        {activeTab === 'community' && <CommunityView />}
 
         {activeTab === 'profile' && <ProfileView />}
       </main>

@@ -3,6 +3,7 @@ import { HdbArea, FlatType } from '../types';
 import { BusArrivalWidget } from './BusArrivalWidget';
 import { LiveResaleDataSection } from './LiveResaleDataSection';
 import { OneMapWidget } from './OneMapWidget';
+import { DisqusComments } from './DisqusComments';
 
 interface AreaDetailModalProps {
   area: HdbArea | null;
@@ -19,7 +20,7 @@ export const AreaDetailModal: React.FC<AreaDetailModalProps> = ({
   isFavorite,
   onToggleFavorite,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'trends' | 'transactions' | 'bus' | 'onemap' | 'amenities' | 'calculator'>('trends');
+  const [activeSubTab, setActiveSubTab] = useState<'trends' | 'transactions' | 'bus' | 'onemap' | 'amenities' | 'calculator' | 'discussion'>('trends');
   const [selectedFlatType, setSelectedFlatType] = useState<FlatType>('4-Room');
 
   if (!isOpen || !area) return null;
@@ -156,6 +157,17 @@ export const AreaDetailModal: React.FC<AreaDetailModalProps> = ({
             }`}
           >
             Mortgage Est.
+          </button>
+          <button
+            onClick={() => setActiveSubTab('discussion')}
+            className={`pb-2 px-3 text-[12px] font-semibold border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeSubTab === 'discussion'
+                ? 'border-[#003d9b] text-[#003d9b]'
+                : 'border-transparent text-[#434654] hover:text-[#091c35]'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[15px]">forum</span>
+            <span>Discussion (Disqus)</span>
           </button>
         </div>
 
@@ -359,6 +371,17 @@ export const AreaDetailModal: React.FC<AreaDetailModalProps> = ({
                   *Based on 25-year HDB concessionary loan at 2.60% p.a. CPF Housing Grants can further lower the downpayment and loan quantum.
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* Subtab 7: Estate Discussion (Disqus) */}
+          {activeSubTab === 'discussion' && (
+            <div className="flex flex-col gap-4">
+              <DisqusComments
+                identifier={`hdb-estate-${area.id}`}
+                title={`${area.name} HDB Estate Discussion & Reviews`}
+                categoryName={`${area.name} (${area.region} Region)`}
+              />
             </div>
           )}
         </div>

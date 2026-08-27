@@ -17,6 +17,8 @@ export const Header: React.FC<HeaderProps> = ({
         return 'Search';
       case 'favorites':
         return 'Favorites';
+      case 'community':
+        return 'Community Forum';
       case 'profile':
         return 'Profile';
       default:

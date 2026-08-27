@@ -15,6 +15,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const navItems: { id: ActiveTab; label: string; icon: string; badge?: number }[] = [
     { id: 'search', label: 'Search', icon: 'search' },
     { id: 'favorites', label: 'Favorites', icon: 'favorite', badge: favoritesCount },
+    { id: 'community', label: 'Community', icon: 'forum' },
     { id: 'profile', label: 'Profile', icon: 'person' },
   ];
 
