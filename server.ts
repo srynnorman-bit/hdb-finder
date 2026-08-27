@@ -28,10 +28,22 @@ async function startServer() {
   // 1. Singapore LTA DataMall v3 Bus Arrival Route
   app.get("/api/bus-arrival", getBusArrivalHandler);
 
-  // 2. Singapore Data.gov.sg HDB Resale API Routes
+  // 2. Singapore Data.gov.sg HDB Resale API Routes & Aliases
   app.get("/api/hdb-resale/transactions", getHdbResaleTransactionsHandler);
+  app.get("/api/hdb-resale", getHdbResaleTransactionsHandler);
+  app.get("/api/hdb_resale", getHdbResaleTransactionsHandler);
+  app.get("/api/action/datastore_search", getHdbResaleTransactionsHandler);
+  app.get("/api/action/datastore_search_sql", getHdbResaleTransactionsHandler);
+  app.get("/api/resale", getHdbResaleTransactionsHandler);
+  app.get("/api/resale/transactions", getHdbResaleTransactionsHandler);
+  app.get("/api/resale-prices", getHdbResaleTransactionsHandler);
+
   app.get("/api/hdb-resale/metadata", getHdbDatasetMetadataHandler);
   app.get("/api/hdb-resale/metadata/:datasetId", getHdbDatasetMetadataHandler);
+  app.get("/api/datasets/metadata", getHdbDatasetMetadataHandler);
+  app.get("/api/datasets/:datasetId/metadata", getHdbDatasetMetadataHandler);
+  app.get("/api/v2/public/api/datasets/:datasetId/metadata", getHdbDatasetMetadataHandler);
+  app.get("/v2/public/api/datasets/:datasetId/metadata", getHdbDatasetMetadataHandler);
 
   // 3. Singapore OneMap API Routes
   app.get("/api/onemap/token", getOneMapTokenHandler);

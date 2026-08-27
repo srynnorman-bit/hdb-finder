@@ -19,6 +19,13 @@ export const LiveResaleDataSection: React.FC<LiveResaleDataSectionProps> = ({
   const [data, setData] = useState<DataGovSearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Synchronize when defaultTown prop updates from modal / parent
+  useEffect(() => {
+    if (defaultTown) {
+      setTown(defaultTown.toUpperCase());
+    }
+  }, [defaultTown]);
+
   // Metadata state
   const [showMetadata, setShowMetadata] = useState<boolean>(false);
   const [metadataLoading, setMetadataLoading] = useState<boolean>(false);
@@ -41,15 +48,36 @@ export const LiveResaleDataSection: React.FC<LiveResaleDataSectionProps> = ({
         params.set('q', searchQuery.trim());
       }
 
-      const res = await fetch(`/api/hdb-resale/transactions?${params.toString()}`);
+      // Try primary backend endpoint first
+      let res = await fetch(`/api/hdb-resale/transactions?${params.toString()}`);
+      
+      // If 404 or failed, try backend alias endpoint
+      if (!res.ok) {
+        res = await fetch(`/api/action/datastore_search?resource_id=d_8b84c4ee58e3cfc0ece0d773c8ca6abc&${params.toString()}`);
+      }
+
+      // If still not ok, try direct data.gov.sg datastore search as browser fallback
+      if (!res.ok) {
+        const directParams = new URLSearchParams();
+        directParams.set('resource_id', 'd_8b84c4ee58e3cfc0ece0d773c8ca6abc');
+        directParams.set('limit', String(limit));
+        if (town && town !== 'ALL') {
+          directParams.set('filters', JSON.stringify({ town: town.toUpperCase() }));
+        }
+        if (searchQuery.trim()) {
+          directParams.set('q', searchQuery.trim());
+        }
+        res = await fetch(`https://data.gov.sg/api/action/datastore_search?${directParams.toString()}`);
+      }
+
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || `Server responded with status ${res.status}`);
+        throw new Error(errJson.error || `Data service returned status ${res.status}`);
       }
       const json: DataGovSearchResult = await res.json();
       setData(json);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to fetch transactions from backend';
+      const msg = err instanceof Error ? err.message : 'Failed to fetch transactions from data.gov.sg';
       setError(msg);
     } finally {
       setLoading(false);
@@ -65,10 +93,16 @@ export const LiveResaleDataSection: React.FC<LiveResaleDataSectionProps> = ({
     setMetadataLoading(true);
     setMetadataError(null);
     try {
-      const res = await fetch('/api/hdb-resale/metadata');
+      let res = await fetch('/api/hdb-resale/metadata');
+      if (!res.ok) {
+        res = await fetch('/api/datasets/metadata');
+      }
+      if (!res.ok) {
+        res = await fetch('https://api-production.data.gov.sg/v2/public/api/datasets/d_8b84c4ee58e3cfc0ece0d773c8ca6abc/metadata');
+      }
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || `Server responded with status ${res.status}`);
+        throw new Error(errJson.error || `Metadata service returned status ${res.status}`);
       }
       const json: DataGovDatasetMetadata = await res.json();
       setMetadata(json);
@@ -205,14 +239,32 @@ export const LiveResaleDataSection: React.FC<LiveResaleDataSectionProps> = ({
             className="w-full bg-white border border-[#dfe8ff] text-[#091c35] text-[12px] rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#003d9b]"
           >
             <option value="ALL">All Towns (SG)</option>
-            <option value="TAMPINES">Tampines</option>
-            <option value="BISHAN">Bishan</option>
-            <option value="PUNGGOL">Punggol</option>
-            <option value="BEDOK">Bedok</option>
-            <option value="QUEENSTOWN">Queenstown</option>
-            <option value="JURONG EAST">Jurong East</option>
-            <option value="WOODLANDS">Woodlands</option>
             <option value="ANG MO KIO">Ang Mo Kio</option>
+            <option value="BEDOK">Bedok</option>
+            <option value="BISHAN">Bishan</option>
+            <option value="BUKIT BATOK">Bukit Batok</option>
+            <option value="BUKIT MERAH">Bukit Merah</option>
+            <option value="BUKIT PANJANG">Bukit Panjang</option>
+            <option value="BUKIT TIMAH">Bukit Timah</option>
+            <option value="CENTRAL AREA">Central Area</option>
+            <option value="CHOA CHU KANG">Choa Chu Kang</option>
+            <option value="CLEMENTI">Clementi</option>
+            <option value="GEYLANG">Geylang</option>
+            <option value="HOUGANG">Hougang</option>
+            <option value="JURONG EAST">Jurong East</option>
+            <option value="JURONG WEST">Jurong West</option>
+            <option value="KALLANG/WHAMPOA">Kallang/Whampoa</option>
+            <option value="MARINE PARADE">Marine Parade</option>
+            <option value="PASIR RIS">Pasir Ris</option>
+            <option value="PUNGGOL">Punggol</option>
+            <option value="QUEENSTOWN">Queenstown</option>
+            <option value="SEMBAWANG">Sembawang</option>
+            <option value="SENGKANG">Sengkang</option>
+            <option value="SERANGOON">Serangoon</option>
+            <option value="TAMPINES">Tampines</option>
+            <option value="TOA PAYOH">Toa Payoh</option>
+            <option value="WOODLANDS">Woodlands</option>
+            <option value="YISHUN">Yishun</option>
           </select>
         </div>
 
